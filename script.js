@@ -391,12 +391,10 @@ async function renderScorePage(){
   <div class="grid-2">
   <select id="sTuan" onchange="previewNNSHTT(); loadRankingTable(this.value)"><option value="">-- Chọn tuần --</option></select>
   <select id="sLop" onchange="previewNNSHTT()"><option value="">-- Chọn lớp --</option></select>
-  <input id="sTB" placeholder="Điểm TB tuần học (TB tuần)">
-  <input id="sDTX" placeholder="Điểm kiểm tra thường xuyên (ĐTX)">
-  <input id="sNHT" placeholder="Số ngày học tốt (NHT)">
-  <input id="sNCC" placeholder="Số ngày chuyên cần (NCC)">
-  <input id="previewNN" placeholder="Điểm Nền nếp dự kiến" readonly style="background:#f8fafc;color:#047857;font-weight:bold;border:1px dashed #cbd5e1;">
-  <input id="previewSHTT" placeholder="Điểm SHTT dự kiến" readonly style="background:#f8fafc;color:#047857;font-weight:bold;border:1px dashed #cbd5e1;">
+  <input id="previewNN" placeholder="Điểm Nề nếp (hệ thống tính)" readonly style="background:#f8fafc;color:#047857;font-weight:bold;border:1px dashed #cbd5e1;">
+    <input id="previewSHTT" placeholder="Điểm SHTT (hệ thống tính)" readonly style="background:#f8fafc;color:#047857;font-weight:bold;border:1px dashed #cbd5e1;">
+    <input id="sDHT" placeholder="Nhập Điểm Học Tập">
+    <input id="sTDT" placeholder="Nhập Điểm Thi Đua">
   </div>
   <button class="btn-primary" style="margin-top:14px" onclick="saveScoreV123()">Tính ĐHT & Xếp hạng</button>
   <button class="btn-danger" style="margin-top:14px;margin-left:8px" onclick="deleteScoreV123()">Xóa điểm học tập</button>
