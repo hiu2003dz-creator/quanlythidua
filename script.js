@@ -116,7 +116,8 @@ async function loadDashboardData(){
   if (!tuanEl) return;
   const tuan = tuanEl.value;
   await safeTask(async()=>{
-    const [dash, thongKe] = await Promise.all([gs('getDashboardTuan', tuan), gs('getThongKeNhomLoi', tuan)]);
+    const dash = await gs('getDashboardTuan', tuan);
+      const thongKe = await gs('getThongKeNhomLoi', tuan);
     const elTongLoi = document.getElementById('dashTongLoi');
     if (elTongLoi) {
       elTongLoi.textContent = fmtNum(dash.TONG_LOI);
@@ -155,7 +156,8 @@ async function renderFormPage(){
     </div>`;
   document.getElementById('ngayVP').value = todayStr();
   await safeTask(async()=>{
-    const [khoiList, nhomList] = await Promise.all([gs('getKhoi'), gs('getNhomLoi')]);
+    const khoiList = await gs('getKhoi');
+      const nhomList = await gs('getNhomLoi');
     document.getElementById('khoi').innerHTML = `<option value="">-- Chọn khối --</option>` + khoiList.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
     document.getElementById('nhomLoi').innerHTML = `<option value="">-- Chọn nhóm lỗi --</option>` + nhomList.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
     document.getElementById('lop').innerHTML = `<option value="">-- Chọn lớp --</option>`;
