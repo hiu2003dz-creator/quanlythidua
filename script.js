@@ -3,6 +3,27 @@ let currentBaseScore = 0;
 let formDataCache = null;
 let autoFillActualScore = true;
 
+// === SECURITY: Auto-logout after 30 minutes of inactivity ===
+let _sessionTimer = null;
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+
+function resetSessionTimer() {
+  clearTimeout(_sessionTimer);
+  if (window.currentUserRole) {
+    _sessionTimer = setTimeout(() => {
+      window.currentUserRole = null;
+      document.getElementById('loginModal').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+      showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'error');
+    }, SESSION_TIMEOUT_MS);
+  }
+}
+
+// Reset timer on any user activity
+['click', 'keydown', 'mousemove', 'touchstart'].forEach(evt => {
+  document.addEventListener(evt, resetSessionTimer, { passive: true });
+});
+
 function showLoading(status){ document.getElementById('loading').style.display = status ? 'flex' : 'none'; }
 function showToast(message,type='success'){
   const el=document.getElementById('toast');
@@ -681,6 +702,7 @@ async function doGuestLogin() {
     document.getElementById('loginModal').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     showToast(`Đăng nhập thành công (${role})`);
+    resetSessionTimer();
     
     // Setup Sidebar based on role
     document.querySelectorAll('.menu-item').forEach(el => el.style.display = 'block');

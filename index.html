@@ -1,12 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <base target="_top">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+  <title>LMS Quản Lý Thi Đua</title>
+
+  <!-- Favicon & App Icons -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#059669">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LMS">
+
+  <!-- Open Graph (preview khi share link) -->
+  <meta property="og:title" content="LMS Quản Lý Thi Đua">
+  <meta property="og:description" content="Hệ thống quản lý thi đua học sinh - Năm học 2026-2027">
+  <meta property="og:image" content="icon-512x512.png">
+  <meta property="og:type" content="website">
+
+  <!-- Security Headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data: blob:;
+    connect-src 'self' https://script.google.com https://script.googleusercontent.com https://*.googleusercontent.com;
+    font-src 'self';
+    frame-src 'none';
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+  ">
 
   <link rel="stylesheet" href="style.css">
   <script src="script.js" defer></script>
-  <!-- APP_SCRIPT_URL: Cần dán link Google Apps Script Web App của bạn vào script.js -->
 </head>
 <body>
   <!-- Login Modal -->
@@ -24,7 +61,7 @@
 
   <div class="header">
     <div style="display:flex;align-items:center">
-      <div class="logo">LMS</div>
+      <img src="favicon-32x32.png" alt="LMS" style="width:32px;height:32px;border-radius:6px;margin-right:8px;">
       <div class="header-title"><h2>QUẢN LÝ THI ĐUA</h2><span>Năm học 2026 - 2027</span></div>
     </div>
     <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
