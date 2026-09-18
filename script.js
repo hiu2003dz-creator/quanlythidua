@@ -1,5 +1,6 @@
 let currentPage = 'dashboard';
 let currentBaseScore = 0;
+let formDataCache = null;
 let autoFillActualScore = true;
 
 function showLoading(status){ document.getElementById('loading').style.display = status ? 'flex' : 'none'; }
