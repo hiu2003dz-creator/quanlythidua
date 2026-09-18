@@ -506,8 +506,7 @@ async function previewNNSHTT() {
     } finally {
       showLoading(false);
     }
-  });
-}
+  }
 
 async function doGuestLogin() {
   await safeTask(async () => {
