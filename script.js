@@ -508,6 +508,21 @@ async function previewNNSHTT() {
     }
   }
 
+async function doLogin() {
+    const user = document.getElementById('loginUsername').value;
+    const pass = document.getElementById('loginPassword').value;
+    if (!user) return showToast('Vui lòng nhập tài khoản', 'error');
+    await safeTask(async () => {
+      const res = await gs('login', user, pass);
+      if (res && res.success) {
+        finishLogin(res.role, res.username);
+      } else {
+        alert(res ? res.message : 'Lỗi đăng nhập');
+        showToast(res ? res.message : 'Lỗi đăng nhập', 'error');
+      }
+    });
+}
+
 async function doGuestLogin() {
   await safeTask(async () => {
     const res = await gs('login', 'khach', '');
