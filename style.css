@@ -32,7 +32,7 @@
     tr:nth-child(even) td{background:#fafafa}
     .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
     .empty{padding:16px;text-align:center;color:#64748b}
-    #loading{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:999;align-items:center;justify-content:center}
+    #loading{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:99999;align-items:center;justify-content:center}
     .loader-box{background:#fff;padding:28px;border-radius:18px;text-align:center;min-width:180px}
     .loader{width:44px;height:44px;border-radius:50%;border:5px solid #ddd;border-top:5px solid #047857;animation:spin 1s linear infinite;margin:0 auto 14px}
     @keyframes spin{100%{transform:rotate(360deg)}}
