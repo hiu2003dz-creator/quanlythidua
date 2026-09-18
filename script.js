@@ -159,10 +159,22 @@ async function renderFormPage(){
     </div>`;
   document.getElementById('ngayVP').value = todayStr();
   await safeTask(async()=>{
-    const khoiList = await gs('getKhoi');
-      const nhomList = await gs('getNhomLoi');
-    document.getElementById('khoi').innerHTML = `<option value="">-- Chọn khối --</option>` + khoiList.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
-    document.getElementById('nhomLoi').innerHTML = `<option value="">-- Chọn nhóm lỗi --</option>` + nhomList.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
+    
+      let initData = formDataCache;
+      if (!initData) {
+        initData = await gs('getFormInitData');
+        formDataCache = initData;
+      }
+      
+      const khoiList = initData.khoiList || [];
+      const nhomList = initData.nhomList || [];
+      
+      document.getElementById('khoi').innerHTML = `<option value="">-- Chọn khối --</option>` + 
+        khoiList.map(x => `<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
+        
+      document.getElementById('nhomLoi').innerHTML = `<option value="">-- Chọn nhóm lỗi --</option>` + 
+        nhomList.map(x => `<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
+
     document.getElementById('lop').innerHTML = `<option value="">-- Chọn lớp --</option>`;
     document.getElementById('hocSinh').innerHTML = `<option value="">-- Chọn học sinh --</option>`;
     document.getElementById('maLoi').innerHTML = `<option value="">-- Chọn lỗi --</option>`;
