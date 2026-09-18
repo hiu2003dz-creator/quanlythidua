@@ -29,6 +29,7 @@ async function gs(method, ...args) {
   const payload = JSON.stringify({ method, args });
   const res = await fetch(APP_SCRIPT_URL, {
     method: "POST",
+      credentials: "omit",
     headers: {
       "Content-Type": "text/plain;charset=utf-8"
     },
