@@ -36,7 +36,18 @@ async function gs(method, ...args) {
   
   return data.result;
 }
-async function safeTask(task){ try{ showLoading(true); await task(); }catch(err){ console.error(err); showToast(err.message || String(err),'error'); }finally{ showLoading(false); } }
+async function safeTask(task){ 
+  try{ 
+    showLoading(true); 
+    await task(); 
+  } catch(err){ 
+    console.error(err); 
+    alert("LỖI HỆ THỐNG: " + (err.message || String(err))); 
+    showToast(err.message || String(err),'error'); 
+  } finally { 
+    showLoading(false); 
+  } 
+}
 
 function toggleSidebar() {
   document.querySelector('.sidebar').classList.toggle('show');
@@ -474,158 +485,26 @@ function exportRankExcel() {
 }
 
 async function previewNNSHTT() {
-  const tuan = document.getElementById('sTuan').value;
-  const lop = document.getElementById('sLop').value;
-  if (!tuan || !lop) {
-    document.getElementById('previewNN').value = "";
-    document.getElementById('previewSHTT').value = "";
-    return;
-  }
-  document.getElementById('previewNN').value = "Đang tính toán...";
-  document.getElementById('previewSHTT').value = "Đang tính toán...";
-  await safeTask(async () => {
-    const res = await gs('getPreviewDiemNNSHTT', tuan, lop);
-    document.getElementById('previewNN').value = "Điểm Nền nếp: " + res.NN;
-    document.getElementById('previewSHTT').value = "Điểm SHTT: " + res.SHTT;
-  });
-}
-
-async function deleteScoreV123() {
-  const tuan = document.getElementById('sTuan').value;
-  const lop = document.getElementById('sLop').value;
-  if (!tuan || !lop) { showToast('Vui lòng chọn Tuần và Lớp để xóa điểm','error'); return; }
-  if (!confirm(`Xác nhận xóa điểm học tập của lớp ${lop} trong Tuần ${tuan}?`)) return;
-  showLoading(true);
-  try {
-    const res = await gs('deleteDiemHocTapV123', tuan, lop);
-    if (res && res.success === false) {
-      showToast(res.message, 'error');
+    const tuan = document.getElementById('sTuan').value;
+    const lop = document.getElementById('sLop').value;
+    if (!tuan || !lop) {
+      document.getElementById('previewNN').value = "";
+      document.getElementById('previewSHTT').value = "";
       return;
     }
-    showToast('Đã xóa điểm học tập');
-    document.getElementById('sTB').value='';
-    document.getElementById('sDTX').value='';
-    document.getElementById('sNHT').value='';
-    document.getElementById('sNCC').value='';
-    await loadRankingTable(tuan);
-  } catch(err) {
-    showToast(err.message || String(err), 'error');
-  } finally {
-    showLoading(false);
-  }
-}
-
-
-async function loadScoreDropdownV1258(){
- const weeks=await gs('getDanhSachTuan')||[];
- document.getElementById('sTuan').innerHTML='<option value="">-- Chọn tuần --</option>'+
- weeks.map(x=>`<option value="${x.value||x.TUAN||''}">${x.label||x.value||x.TUAN}</option>`).join('');
- const lops=await gs('getLop')||[];
- document.getElementById('sLop').innerHTML='<option value="">-- Chọn lớp --</option>'+
- lops.map(x=>`<option value="${x}">${x}</option>`).join('');
-}
-
-async function saveScoreV123(){
- if(!sTuan.value || !sLop.value) {
-   showToast('Vui lòng chọn Tuần và Lớp trước khi tính điểm', 'error');
-   return;
- }
- showLoading(true);
- try {
-   await gs('saveDiemHocTapV123',{
-   TUAN:sTuan.value,
-   LOP:sLop.value,
-   TB_TUAN:sTB.value,
-   DTX:sDTX.value,
-   NHT:sNHT.value,
-   NCC:sNCC.value
-   });
-   showToast('Đã lưu điểm thi đua');
- } catch(err) {
-   showToast(err.message || String(err), 'error');
- } finally {
-   await loadRankingTable(sTuan.value);
- }
-}
-
-
-let currentViolationIds=[];
-
-async function openStudentViolation(idHs,name){
-  document.getElementById('violationModal').style.display='block';
-  document.getElementById('violationTitle').innerText='Danh sách lỗi: '+name;
-  const tuan=(document.querySelector('select[id="weekSelect"]')||{}).value||'';
-  const data=await gs('getChiTietLoiHocSinh',idHs,tuan);
-  document.getElementById('violationList').innerHTML=data.length?data.map(x=>`
-  <div class="muted-box">
-  <input type="checkbox" class="vpCheck" value="${x.ID_VP}">
-  ${x.NGAY_VP} | ${x.TEN_LOI} | -${x.DIEM_TRU} điểm
-  </div>`).join(''):'Không có lỗi';
-  loadAuditLog();
-}
-
-function closeViolationModal(){
- document.getElementById('violationModal').style.display='none';
-}
-
-async function deleteSelectedViolation(){
- const ids=[...document.querySelectorAll('.vpCheck:checked')].map(x=>x.value);
- if(!ids.length){showToast('Chưa chọn lỗi cần xóa','error');return;}
- if(!confirm('Xác nhận xóa '+ids.length+' lỗi?')) return;
- const res=await gs('deleteMultiViPham',ids);
- showToast(res.message);
- closeViolationModal();
- loadStudentData();
-}
-
-async function loadAuditLog(){
- const data=await gs('getAuditLog');
- document.getElementById('auditList').innerHTML=data.slice(0,20).map(x=>
- `<div>${x.THOI_GIAN} | ${x.ACTION} | ${x.ID_VP}</div>`
- ).join('');
-}
-
-window.onerror = function(message){ showToast('Lỗi giao diện: ' + message, 'error'); };
-window.addEventListener('DOMContentLoaded', ()=> openPage('dashboard'));
-
-  async function saveAdminAccount(){
-    const user = document.getElementById('adminUser').value;
-    const pass = document.getElementById('adminPass').value;
-    const role = document.getElementById('adminRole').value;
-    if(!user || !pass) return showToast('Vui lòng nhập đủ thông tin', 'error');
-    await safeTask(async()=>{ 
-      const res = await gs('taoTaiKhoan', user, pass, role); 
-      showToast(res.message || 'Đã tạo tài khoản'); 
-      document.getElementById('adminUser').value=''; 
-      document.getElementById('adminPass').value=''; 
-      await loadAdminAccounts();
-    });
-  }
-  async function loadAdminAccounts(){
-    const data = await gs('getDanhSachTaiKhoan');
-    document.getElementById('adminAccountsTable').innerHTML = data.map(x=>`<tr><td><b>${x.USERNAME}</b><br><span style="font-size:11px;color:#666">${x.ROLE}</span></td><td style="text-align:right"><button class="btn-secondary" style="padding:4px 8px;font-size:12px;background:#fef2f2;color:#dc2626;border:none" onclick="deleteAdminAccount('${x.USERNAME}')">Xóa</button></td></tr>`).join('');
-  }
-  async function deleteAdminAccount(username){
-    if(!confirm(`Xóa tài khoản ${username}?`)) return;
-    await safeTask(async()=>{
-      await gs('xoaTaiKhoan', username);
-      showToast('Đã xóa');
-      await loadAdminAccounts();
-    });
-  }
-
-  window.currentUserRole = null;
-  
-  async function doLogin() {
-  const user = document.getElementById('loginUsername').value;
-  const pass = document.getElementById('loginPassword').value;
-  if (!user) return showToast('Vui lòng nhập tài khoản', 'error');
-  await safeTask(async () => {
-    const res = await gs('login', user, pass);
-    if (res && res.success) {
-      finishLogin(res.role, res.username);
-    } else {
-      showToast(res ? res.message : 'Lỗi đăng nhập', 'error');
+    document.getElementById('previewNN').value = "Đang tính toán...";
+    document.getElementById('previewSHTT').value = "Đang tính toán...";
+    try {
+      showLoading(true);
+      const res = await gs('getPreviewDiemNNSHTT', tuan, lop);
+      document.getElementById('previewNN').value = "Điểm Nền nếp: " + res.NN;
+      document.getElementById('previewSHTT').value = "Điểm SHTT: " + res.SHTT;
+    } catch(err) {
+      document.getElementById('previewNN').value = "Lỗi!";
+      document.getElementById('previewSHTT').value = "Lỗi!";
+      alert("Lỗi khi tính toán: " + err.message);
+    } finally {
+      showLoading(false);
     }
   });
 }
@@ -640,6 +519,7 @@ async function doGuestLogin() {
   function finishLogin(role, username) {
     window.currentUserRole = role;
     document.getElementById('loginModal').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
     showToast(`Đăng nhập thành công (${role})`);
     
     // Setup Sidebar based on role
