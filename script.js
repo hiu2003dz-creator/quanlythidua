@@ -7,7 +7,8 @@ function showLoading(status){ document.getElementById('loading').style.display =
 function showToast(message,type='success'){
   const el=document.getElementById('toast');
   el.className=type; el.textContent=message; el.style.display='block';
-  clearTimeout(showToast._t); showToast._t=setTimeout(()=>{el.style.display='none';},3500);
+  const duration = type === 'error' ? 5000 : 3500;
+  clearTimeout(showToast._t); showToast._t=setTimeout(()=>{el.style.display='none';},duration);
 }
 function escapeHtml(v){ return String(v ?? '').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 function fmtNum(v){ const n=Number(v||0); return Number.isInteger(n) ? String(n) : n.toFixed(2); }
@@ -25,34 +26,88 @@ async function gs(method, ...args) {
   if (CACHE_METHODS.includes(method) && FRONTEND_CACHE[cacheKey] !== undefined) {
     return FRONTEND_CACHE[cacheKey];
   }
-  
+
+  const MAX_RETRIES = 3;
   const payload = JSON.stringify({ method, args });
-  const res = await fetch(APP_SCRIPT_URL, {
-    method: "POST",
-      credentials: "omit",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8"
-    },
-    body: payload
-  });
-  
-  const data = await res.json();
-  if (!data.success) {
-    throw new Error(data.error);
+
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      const res = await fetch(APP_SCRIPT_URL, {
+        method: "POST",
+        redirect: "follow",
+        credentials: "omit",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: payload,
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      const text = await res.text();
+
+      // Google Apps Script sometimes returns HTML instead of JSON
+      // (auth redirect, rate limit, multi-account conflict)
+      if (text.trimStart().startsWith("<") || text.trimStart().startsWith("<!DOCTYPE")) {
+        console.warn(`[gs] Attempt ${attempt}/${MAX_RETRIES}: Got HTML instead of JSON for "${method}". Retrying...`);
+        if (attempt < MAX_RETRIES) {
+          await new Promise(r => setTimeout(r, 1500 * attempt));
+          continue;
+        }
+        throw new Error("Máy chủ Google tạm thời không phản hồi. Vui lòng thử lại sau vài giây.");
+      }
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        console.warn(`[gs] Attempt ${attempt}/${MAX_RETRIES}: JSON parse failed for "${method}":`, text.substring(0, 200));
+        if (attempt < MAX_RETRIES) {
+          await new Promise(r => setTimeout(r, 1500 * attempt));
+          continue;
+        }
+        throw new Error("Dữ liệu trả về không hợp lệ. Vui lòng tải lại trang.");
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || "Lỗi không xác định từ server");
+      }
+
+      if (CACHE_METHODS.includes(method)) {
+        FRONTEND_CACHE[cacheKey] = data.result;
+      }
+      return data.result;
+
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        console.warn(`[gs] Attempt ${attempt}/${MAX_RETRIES}: Timeout for "${method}".`);
+        if (attempt < MAX_RETRIES) {
+          await new Promise(r => setTimeout(r, 1500 * attempt));
+          continue;
+        }
+        throw new Error("Kết nối quá chậm. Vui lòng kiểm tra mạng và thử lại.");
+      }
+      // If it's our own thrown error (not a network/retry issue), don't retry
+      if (err.message && !err.message.includes("Failed to fetch")) {
+        throw err;
+      }
+      // Network error - retry
+      console.warn(`[gs] Attempt ${attempt}/${MAX_RETRIES}: Network error for "${method}":`, err.message);
+      if (attempt < MAX_RETRIES) {
+        await new Promise(r => setTimeout(r, 1500 * attempt));
+        continue;
+      }
+      throw new Error("Lỗi kết nối mạng. Vui lòng kiểm tra Internet và thử lại.");
+    }
   }
-  
-  if (CACHE_METHODS.includes(method)) {
-    FRONTEND_CACHE[cacheKey] = data.result;
-  }
-  return data.result;
 }
 async function safeTask(task){ 
   try{ 
     showLoading(true); 
     await task(); 
   } catch(err){ 
-    console.error(err); 
-    alert("LỖI HỆ THỐNG: " + (err.message || String(err))); 
+    console.error('[safeTask]', err); 
     showToast(err.message || String(err),'error'); 
   } finally { 
     showLoading(false); 
@@ -118,9 +173,18 @@ async function loadDashboardData(){
   if (!tuanEl) return;
   const tuan = tuanEl.value;
   await safeTask(async()=>{
-    const data = await gs('getDashboardDataV123', tuan);
-      const dash = data.dash;
-      const thongKe = data.thongKe;
+    let dash, thongKe;
+    try {
+      // Try combined API first (faster, 1 call)
+      const data = await gs('getDashboardDataV123', tuan);
+      dash = data.dash;
+      thongKe = data.thongKe;
+    } catch(e) {
+      // Fallback to separate calls if new API not deployed yet
+      console.warn('[Dashboard] getDashboardDataV123 failed, falling back to separate calls:', e.message);
+      dash = await gs('getDashboardTuan', tuan);
+      thongKe = await gs('getThongKeNhomLoi', tuan);
+    }
     const elTongLoi = document.getElementById('dashTongLoi');
     if (elTongLoi) {
       elTongLoi.textContent = fmtNum(dash.TONG_LOI);
@@ -159,21 +223,26 @@ async function renderFormPage(){
     </div>`;
   document.getElementById('ngayVP').value = todayStr();
   await safeTask(async()=>{
-    
+    let khoiList, nhomList;
+    try {
       let initData = formDataCache;
       if (!initData) {
         initData = await gs('getFormInitData');
         formDataCache = initData;
       }
+      khoiList = initData.khoiList || [];
+      nhomList = initData.nhomList || [];
+    } catch(e) {
+      console.warn('[Form] getFormInitData failed, falling back:', e.message);
+      khoiList = await gs('getKhoi');
+      nhomList = await gs('getNhomLoi');
+    }
       
-      const khoiList = initData.khoiList || [];
-      const nhomList = initData.nhomList || [];
-      
-      document.getElementById('khoi').innerHTML = `<option value="">-- Chọn khối --</option>` + 
-        khoiList.map(x => `<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
+    document.getElementById('khoi').innerHTML = `<option value="">-- Chọn khối --</option>` + 
+      khoiList.map(x => `<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
         
-      document.getElementById('nhomLoi').innerHTML = `<option value="">-- Chọn nhóm lỗi --</option>` + 
-        nhomList.map(x => `<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
+    document.getElementById('nhomLoi').innerHTML = `<option value="">-- Chọn nhóm lỗi --</option>` + 
+      nhomList.map(x => `<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
 
     document.getElementById('lop').innerHTML = `<option value="">-- Chọn lớp --</option>`;
     document.getElementById('hocSinh').innerHTML = `<option value="">-- Chọn học sinh --</option>`;
@@ -590,17 +659,12 @@ async function doLogin() {
     if (!user) return showToast('Vui lòng nhập tài khoản', 'error');
     if (!pass) return showToast('Vui lòng nhập mật khẩu', 'error');
     
-    // DEBUG ALERT
-    alert("Bắt đầu đăng nhập tài khoản: " + user);
-    
     await safeTask(async () => {
       const res = await gs('login', user, pass);
       if (res && res.success) {
-        alert("Đăng nhập thành công!");
         finishLogin(res.role, res.username);
       } else {
-        alert(res ? "Đăng nhập thất bại: " + res.message : 'Lỗi đăng nhập không xác định');
-        showToast(res ? res.message : 'Lỗi đăng nhập', 'error');
+        showToast(res ? res.message : 'Sai tài khoản hoặc mật khẩu', 'error');
       }
     });
 }
