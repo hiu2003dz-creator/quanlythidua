@@ -118,8 +118,9 @@ async function loadDashboardData(){
   if (!tuanEl) return;
   const tuan = tuanEl.value;
   await safeTask(async()=>{
-    const dash = await gs('getDashboardTuan', tuan);
-      const thongKe = await gs('getThongKeNhomLoi', tuan);
+    const data = await gs('getDashboardDataV123', tuan);
+      const dash = data.dash;
+      const thongKe = data.thongKe;
     const elTongLoi = document.getElementById('dashTongLoi');
     if (elTongLoi) {
       elTongLoi.textContent = fmtNum(dash.TONG_LOI);
