@@ -16,11 +16,16 @@ function todayStr(){ const d=new Date(); return `${d.getFullYear()}-${String(d.g
 // Thay thế bằng URL Web App Google Apps Script của bạn (nhớ chọn Anyone)
 const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNyK_nfSu9xw6JmR9obSMbEI0MP5kkepuv-iBnGybY2Em9mXg0N3MScxpXlqJiq2xL/exec";
 
+const FRONTEND_CACHE = {};
+const CACHE_METHODS = ['getKhoi', 'getNhomLoi', 'getLopTheoKhoi', 'getHocSinhTheoLop', 'getLoiTheoNhom', 'getDanhSachTuan', 'getLop'];
+
 async function gs(method, ...args) {
-  
+  const cacheKey = method + JSON.stringify(args);
+  if (CACHE_METHODS.includes(method) && FRONTEND_CACHE[cacheKey] !== undefined) {
+    return FRONTEND_CACHE[cacheKey];
+  }
   
   const payload = JSON.stringify({ method, args });
-  
   const res = await fetch(APP_SCRIPT_URL, {
     method: "POST",
     headers: {
@@ -34,6 +39,9 @@ async function gs(method, ...args) {
     throw new Error(data.error);
   }
   
+  if (CACHE_METHODS.includes(method)) {
+    FRONTEND_CACHE[cacheKey] = data.result;
+  }
   return data.result;
 }
 async function safeTask(task){ 
@@ -512,12 +520,18 @@ async function doLogin() {
     const user = document.getElementById('loginUsername').value;
     const pass = document.getElementById('loginPassword').value;
     if (!user) return showToast('Vui lòng nhập tài khoản', 'error');
+    if (!pass) return showToast('Vui lòng nhập mật khẩu', 'error');
+    
+    // DEBUG ALERT
+    alert("Bắt đầu đăng nhập tài khoản: " + user);
+    
     await safeTask(async () => {
       const res = await gs('login', user, pass);
       if (res && res.success) {
+        alert("Đăng nhập thành công!");
         finishLogin(res.role, res.username);
       } else {
-        alert(res ? res.message : 'Lỗi đăng nhập');
+        alert(res ? "Đăng nhập thất bại: " + res.message : 'Lỗi đăng nhập không xác định');
         showToast(res ? res.message : 'Lỗi đăng nhập', 'error');
       }
     });
