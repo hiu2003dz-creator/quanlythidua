@@ -1,0 +1,43 @@
+*{box-sizing:border-box;font-family:"Segoe UI",Arial,sans-serif}
+    body{margin:0;background:#eef2f7;color:#1f2937}
+    .header{height:70px;background:linear-gradient(135deg,#065f46,#10b981);color:#fff;display:flex;align-items:center;padding:0 22px;position:fixed;top:0;left:0;right:0;z-index:100}
+    .logo{width:42px;height:42px;border-radius:12px;background:#fff;color:#047857;display:flex;align-items:center;justify-content:center;font-weight:800;margin-right:14px}
+    .header-title h2{margin:0;font-size:18px}.header-title span{font-size:12px;opacity:.85}
+    .sidebar{position:fixed;top:70px;left:0;bottom:0;width:230px;background:#064e3b;padding:18px 12px;overflow:auto}
+    .menu-item{padding:13px 14px;border-radius:12px;margin-bottom:8px;color:#fff;cursor:pointer;font-weight:600;transition:.2s}
+    .menu-item:hover,.menu-item.active{background:#10b981}
+    .main{margin-left:230px;padding:92px 24px 24px}
+    .card{background:#fff;border-radius:18px;padding:18px;margin-bottom:18px;box-shadow:0 8px 24px rgba(15,23,42,.08)}
+    .card-title{font-size:24px;font-weight:800;color:#065f46;margin-bottom:14px}
+    .sub-title{font-size:18px;font-weight:700;color:#0f766e;margin-bottom:12px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:10px}
+    .stat{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 6px 16px rgba(15,23,42,.05)}
+    .stat .label{font-size:14px;color:#64748b}.stat .value{margin-top:8px;font-size:34px;font-weight:800;color:#047857}
+    label{display:block;font-size:14px;font-weight:600;margin-bottom:6px;color:#334155}
+    input,select,textarea{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:10px;outline:none;background:#fff}
+    input:focus,select:focus,textarea:focus{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.12)}
+    textarea{min-height:90px;resize:vertical}
+    .btn-row{display:flex;flex-wrap:wrap;gap:10px}
+    button{padding:11px 16px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+    .btn-primary{background:#047857;color:#fff}.btn-secondary{background:#e2e8f0;color:#0f172a}.btn-danger{background:#dc2626;color:#fff}
+    .note{font-size:13px;color:#64748b;margin-top:6px}
+    .table-wrap{overflow:auto;border:1px solid #e5e7eb;border-radius:14px}
+    table{width:100%;border-collapse:collapse;background:#fff}
+    th{background:#047857;color:#fff;padding:12px 10px;text-align:center;white-space:nowrap}
+    td{padding:10px;border-bottom:1px solid #e5e7eb;vertical-align:top}
+    td.center{text-align:center} td.right{text-align:right} td.bold{font-weight:700}
+    tr:nth-child(even) td{background:#fafafa}
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .empty{padding:16px;text-align:center;color:#64748b}
+    #loading{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:999;align-items:center;justify-content:center}
+    .loader-box{background:#fff;padding:28px;border-radius:18px;text-align:center;min-width:180px}
+    .loader{width:44px;height:44px;border-radius:50%;border:5px solid #ddd;border-top:5px solid #047857;animation:spin 1s linear infinite;margin:0 auto 14px}
+    @keyframes spin{100%{transform:rotate(360deg)}}
+    #toast{position:fixed;right:20px;bottom:20px;z-index:1000;display:none;min-width:260px;max-width:520px;padding:14px 16px;border-radius:12px;color:#fff;font-weight:700;box-shadow:0 10px 25px rgba(0,0,0,.2)}
+    #toast.success{background:#059669} #toast.error{background:#dc2626} #toast.info{background:#2563eb}
+    .admin-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .muted-box{padding:12px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0}
+    @media(max-width:960px){.sidebar{width:72px}.menu-item{font-size:0;padding:14px 8px;text-align:center}.main{margin-left:72px;padding:92px 14px 14px}.grid-2,.grid-3,.grid-4,.stats,.admin-grid{grid-template-columns:1fr}}

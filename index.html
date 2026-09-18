@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+  <!-- APP_SCRIPT_URL: Cần dán link Google Apps Script Web App của bạn vào script.js -->
+</head>
+<body>
+  <!-- Login Modal -->
+  <div id="loginModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;">
+    <div class="card" style="width:100%;max-width:400px;margin:20px;">
+      <h2 style="text-align:center;color:#059669;margin-bottom:20px;">LMS QUẢN LÝ THI ĐUA</h2>
+      <label>Tài khoản</label>
+      <input id="loginUsername" placeholder="Nhập tài khoản" style="margin-bottom:15px;">
+      <label>Mật khẩu</label>
+      <input id="loginPassword" type="password" placeholder="Nhập mật khẩu" style="margin-bottom:20px;" onkeydown="if(event.key==='Enter') doLogin()">
+      <button class="btn-primary" style="width:100%;padding:12px;font-size:16px;margin-bottom:10px;" onclick="doLogin()">Đăng nhập</button>
+      <button class="btn-secondary" style="width:100%;padding:12px;font-size:16px;" onclick="doGuestLogin()">Truy cập Quyền xem (Khách)</button>
+    </div>
+  </div>
+
+  <div class="header">
+    <div style="display:flex;align-items:center">
+      <div class="logo">LMS</div>
+      <div class="header-title"><h2>QUẢN LÝ THI ĐUA</h2><span>Năm học 2026 - 2027</span></div>
+    </div>
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+  </div>
+
+  <div class="sidebar">
+    <div class="menu-item active" data-page="dashboard" onclick="openPage('dashboard',this)">🏠 Dashboard tuần</div>
+    <div class="menu-item" data-page="form" onclick="openPage('form',this)">📝 Nhập vi phạm</div>
+    <div class="menu-item" data-page="student" onclick="openPage('student',this)">👨‍🎓 Tổng hợp học sinh</div>
+    <div class="menu-item" data-page="rank" onclick="openPage('rank',this)">🏫 Xếp hạng lớp</div>
+    <div class="menu-item" data-page="week" onclick="openPage('week',this)">📊 Báo cáo tuần</div>
+    <div class="menu-item" data-page="score" onclick="openPage('score',this)">📚 Tính điểm & xếp hạng</div>
+    <div class="menu-item" data-page="export" onclick="openPage('export',this)">📥 Xuất Excel</div>
+    <div class="menu-item" data-page="admin" onclick="openPage('admin',this)">⚙️ Quản trị</div>
+
+  </div>
+
+  <div class="main"><div id="app"></div></div>
+  <div id="loading"><div class="loader-box"><div class="loader"></div><div>Đang tải dữ liệu...</div></div></div>
+  <div id="toast"></div>
+
+<div id="violationModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2000">
+<div class="card" style="width:700px;margin:70px auto;max-height:80vh;overflow:auto">
+<h3 id="violationTitle">Danh sách lỗi</h3>
+<div id="violationList"></div>
+<div class="btn-row">
+<button class="btn-danger" onclick="deleteSelectedViolation()">🗑 Xóa lỗi đã chọn</button>
+<button class="btn-secondary" onclick="closeViolationModal()">Đóng</button>
+</div>
+<hr>
+<h4>Audit log</h4>
+<div id="auditList"></div>
+</div>
+</div>
