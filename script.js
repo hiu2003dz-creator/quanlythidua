@@ -495,6 +495,57 @@ function exportRankExcel() {
   document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 
+
+async function loadScoreDropdownV1258(){
+  await safeTask(async()=>{
+   const weeks=await gs('getDanhSachTuan')||[];
+   document.getElementById('sTuan').innerHTML='<option value="">-- Chọn tuần --</option>'+
+   weeks.map(x=>`<option value="${x.value||x.TUAN}">${x.label||x.value||x.TUAN}</option>`).join('');
+   const lops=await gs('getLop')||[];
+   document.getElementById('sLop').innerHTML='<option value="">-- Chọn lớp --</option>'+
+   lops.map(x=>`<option>${x}</option>`).join('');
+  });
+}
+
+async function saveScoreV123() {
+    const tuan = document.getElementById('sTuan').value;
+    const lop = document.getElementById('sLop').value;
+    const dht = document.getElementById('sDHT').value;
+    const tdt = document.getElementById('sTDT').value;
+    
+    if (!tuan) return showToast('Vui lòng chọn tuần', 'error');
+    if (!lop) return showToast('Vui lòng chọn lớp', 'error');
+    if (dht === '') return showToast('Vui lòng nhập điểm học tập', 'error');
+    if (tdt === '') return showToast('Vui lòng nhập điểm thi đua', 'error');
+    
+    await safeTask(async () => {
+        await gs('saveDiemHocTapV123', {
+            TUAN: tuan,
+            LOP: lop,
+            DHT: Number(dht),
+            TDT: Number(tdt)
+        });
+        showToast(`Đã lưu điểm cho lớp ${lop} (Tuần ${tuan})`);
+        loadRankingTable(tuan);
+    });
+}
+
+async function deleteScoreV123() {
+    const tuan = document.getElementById('sTuan').value;
+    const lop = document.getElementById('sLop').value;
+    
+    if (!tuan || !lop) return showToast('Vui lòng chọn tuần và lớp', 'error');
+    if (!confirm(`Bạn có chắc muốn xoá điểm lớp ${lop} trong tuần ${tuan}?`)) return;
+    
+    await safeTask(async () => {
+        await gs('xoaDiemHocTapTuan', tuan, lop);
+        showToast('Đã xoá điểm thành công');
+        document.getElementById('sDHT').value = '';
+        document.getElementById('sTDT').value = '';
+        loadRankingTable(tuan);
+    });
+}
+
 async function previewNNSHTT() {
     const tuan = document.getElementById('sTuan').value;
     const lop = document.getElementById('sLop').value;
