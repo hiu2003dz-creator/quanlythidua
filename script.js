@@ -538,7 +538,7 @@ async function deleteScoreV123() {
     if (!confirm(`Bạn có chắc muốn xoá điểm lớp ${lop} trong tuần ${tuan}?`)) return;
     
     await safeTask(async () => {
-        await gs('xoaDiemHocTapTuan', tuan, lop);
+        await gs('deleteDiemHocTapV123', tuan, lop);
         showToast('Đã xoá điểm thành công');
         document.getElementById('sDHT').value = '';
         document.getElementById('sTDT').value = '';
@@ -620,3 +620,37 @@ async function doGuestLogin() {
     
     openPage('dashboard', document.querySelector('.menu-item[data-page="dashboard"]'));
   }
+
+async function openStudentViolation(idHs,name){
+    document.getElementById('violationModal').style.display='block';
+    document.getElementById('violationTitle').innerText='Danh sách lỗi: '+name;
+    const tuan=(document.querySelector('select[id="weekSelect"]')||{}).value||'';
+    const data=await gs('getChiTietLoiHocSinh',idHs,tuan);
+    document.getElementById('violationList').innerHTML=data.length?data.map(x=>`
+    <div class="muted-box">
+    <input type="checkbox" class="vpCheck" value="${x.ID_VP}">
+    ${x.NGAY_VP} | ${x.TEN_LOI} | -${x.DIEM_TRU} điểm
+    </div>`).join(''):'Không có lỗi';
+    loadAuditLog();
+}
+
+function closeViolationModal(){
+   document.getElementById('violationModal').style.display='none';
+}
+
+async function deleteSelectedViolation(){
+   const ids=[...document.querySelectorAll('.vpCheck:checked')].map(x=>x.value);
+   if(!ids.length){showToast('Chưa chọn lỗi cần xóa','error');return;}
+   if(!confirm('Xác nhận xóa '+ids.length+' lỗi?')) return;
+   const res=await gs('deleteMultiViPham',ids);
+   showToast(res.message);
+   closeViolationModal();
+   loadStudentData();
+}
+
+async function loadAuditLog(){
+   const data=await gs('getAuditLog');
+   document.getElementById('auditList').innerHTML=data.slice(0,20).map(x=>
+   `<div>${x.THOI_GIAN} | ${x.ACTION} | ${x.ID_VP}</div>`
+   ).join('');
+}
