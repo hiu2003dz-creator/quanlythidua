@@ -40,12 +40,38 @@ function todayStr(){ const d=new Date(); return `${d.getFullYear()}-${String(d.g
 const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNyK_nfSu9xw6JmR9obSMbEI0MP5kkepuv-iBnGybY2Em9mXg0N3MScxpXlqJiq2xL/exec";
 
 const FRONTEND_CACHE = {};
-const CACHE_METHODS = ['getKhoi', 'getNhomLoi', 'getLopTheoKhoi', 'getHocSinhTheoLop', 'getLoiTheoNhom', 'getDanhSachTuan', 'getLop'];
+const CACHE_METHODS = ['getKhoi', 'getNhomLoi', 'getLopTheoKhoi', 'getHocSinhTheoLop', 'getLoiTheoNhom', 'getDanhSachTuan', 'getLop', 'getFormInitData'];
+const LOCAL_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+// localStorage cache with TTL
+function lsGet(key) {
+  try {
+    const raw = localStorage.getItem('lms_' + key);
+    if (!raw) return undefined;
+    const { data, exp } = JSON.parse(raw);
+    if (Date.now() > exp) { localStorage.removeItem('lms_' + key); return undefined; }
+    return data;
+  } catch(e) { return undefined; }
+}
+function lsSet(key, data) {
+  try {
+    localStorage.setItem('lms_' + key, JSON.stringify({ data, exp: Date.now() + LOCAL_CACHE_TTL }));
+  } catch(e) { /* storage full, ignore */ }
+}
 
 async function gs(method, ...args) {
   const cacheKey = method + JSON.stringify(args);
+  // Level 1: in-memory cache (instant)
   if (CACHE_METHODS.includes(method) && FRONTEND_CACHE[cacheKey] !== undefined) {
     return FRONTEND_CACHE[cacheKey];
+  }
+  // Level 2: localStorage cache (survives page reload, 10 min TTL)
+  if (CACHE_METHODS.includes(method)) {
+    const lsData = lsGet(cacheKey);
+    if (lsData !== undefined) {
+      FRONTEND_CACHE[cacheKey] = lsData;
+      return lsData;
+    }
   }
 
   const MAX_RETRIES = 3;
@@ -97,6 +123,7 @@ async function gs(method, ...args) {
 
       if (CACHE_METHODS.includes(method)) {
         FRONTEND_CACHE[cacheKey] = data.result;
+        lsSet(cacheKey, data.result);
       }
       return data.result;
 
