@@ -475,69 +475,100 @@ async function exportExcelTuan(){
 }
 
 async function renderAdminPage(){
-  document.getElementById('app').innerHTML = `
-    <div class="card">
-      <div class="card-title">⚙️ Quản trị danh mục</div>
-      <div class="admin-grid">
+    document.getElementById('app').innerHTML = `
+      <div class="card">
+        <div class="card-title">⚙️ Quản trị danh mục</div>
+        <div class="admin-grid">
+            <div class="card" style="margin:0">
+              <div class="sub-title">🔑 Quản lý Tài khoản</div>
+              <label>Tài khoản</label><input id="adminUser">
+              <label style="margin-top:10px">Mật khẩu</label><input id="adminPass">
+              <label style="margin-top:10px">Quyền</label>
+              <select id="adminRole">
+                <option value="SCORER">Giám thị / Cờ đỏ (Chỉ nhập vi phạm)</option>
+                <option value="ADMIN">Admin (Toàn quyền)</option>
+              </select>
+              <div class="btn-row" style="margin-top:14px">
+                <button class="btn-primary" onclick="saveAdminAccount()">Tạo / Cập nhật</button>
+              </div>
+              <div style="margin-top:20px;max-height:200px;overflow-y:auto;">
+                <table style="font-size:13px;">
+                  <thead><tr><th>Tài khoản</th><th>Quyền</th><th></th></tr></thead>
+                  <tbody id="adminAccountsTable"></tbody>
+                </table>
+              </div>
+            </div>
+  
           <div class="card" style="margin:0">
-            <div class="sub-title">🔑 Quản lý Tài khoản</div>
-            <label>Tài khoản</label><input id="adminUser">
-            <label style="margin-top:10px">Mật khẩu</label><input id="adminPass">
-            <label style="margin-top:10px">Quyền</label>
-            <select id="adminRole">
-              <option value="SCORER">Giám thị / Cờ đỏ (Chỉ nhập vi phạm)</option>
-              <option value="ADMIN">Admin (Toàn quyền)</option>
-            </select>
-            <div class="btn-row" style="margin-top:14px">
-              <button class="btn-primary" onclick="saveAdminAccount()">Tạo / Cập nhật</button>
-            </div>
-            <div style="margin-top:20px;max-height:200px;overflow-y:auto;">
-              <table style="font-size:13px;"><tbody id="adminAccountsTable"></tbody></table>
-            </div>
+            <div class="sub-title">🏢  Thêm lớp mới</div>
+            <label>Khối</label><input id="adminKhoiLop" placeholder="Ví dụ: 10">
+            <label style="margin-top:10px">Tên lớp</label><input id="adminTenLop" placeholder="Ví dụ: 10A12">
+            <div class="btn-row" style="margin-top:14px"><button class="btn-primary" onclick="saveAdminClass()">Lưu lớp</button></div>
           </div>
-
-        <div class="card" style="margin:0">
-          <div class="sub-title">➕ Thêm lớp mới</div>
-          <label>Khối</label><input id="adminKhoiLop" placeholder="Ví dụ: 10">
-          <label style="margin-top:10px">Tên lớp</label><input id="adminTenLop" placeholder="Ví dụ: 10A12">
-          <div class="btn-row" style="margin-top:14px"><button class="btn-primary" onclick="saveAdminClass()">Lưu lớp</button></div>
+          <div class="card" style="margin:0">
+            <div class="sub-title">👨‍🎓  Thêm học sinh mới</div>
+            <label>Mã học sinh</label><input id="adminMaHS" placeholder="Có thể để trống">
+            <label style="margin-top:10px">Khối</label><input id="adminKhoiHS" placeholder="Ví dụ: 10">
+            <label style="margin-top:10px">Lớp</label><input id="adminLopHS" placeholder="Ví dụ: 10A12">
+            <label style="margin-top:10px">Họ tên</label><input id="adminHoTenHS">
+            <label style="margin-top:10px">Ngày sinh</label><input id="adminNgaySinhHS" placeholder="dd/MM/yyyy hoặc để trống">
+            <label style="margin-top:10px">Giới tính</label><select id="adminGioiTinhHS"><option value="">-- Chọn --</option><option>Nam</option><option>Nữ</option></select>
+            <div class="btn-row" style="margin-top:14px"><button class="btn-primary" onclick="saveAdminStudent()">Lưu học sinh</button></div>
+          </div>
+          <div class="card" style="margin:0">
+            <div class="sub-title">⚠️  Thêm lỗi vi phạm mới</div>
+            <label>Mã lỗi</label><input id="adminMaLoi">
+            <label style="margin-top:10px">Nhóm lỗi</label><input id="adminNhomLoi" placeholder="Ví dụ: GIAO_THONG">
+            <label style="margin-top:10px">Tên lỗi</label><input id="adminTenLoi">
+            <label style="margin-top:10px">Điểm trừ chuẩn</label><input id="adminDiemTru" type="number" step="0.01">
+            <label style="margin-top:10px">Đơn vị</label><input id="adminDonVi" value="Lần">
+            <label style="margin-top:10px">Mô tả</label><textarea id="adminMoTa"></textarea>
+            <div class="btn-row" style="margin-top:14px"><button class="btn-primary" onclick="saveAdminError()">Lưu lỗi</button></div>
+          </div>
         </div>
-        <div class="card" style="margin:0">
-          <div class="sub-title">➕ Thêm học sinh mới</div>
-          <label>Mã học sinh</label><input id="adminMaHS" placeholder="Có thể để trống">
-          <label style="margin-top:10px">Khối</label><input id="adminKhoiHS" placeholder="Ví dụ: 10">
-          <label style="margin-top:10px">Lớp</label><input id="adminLopHS" placeholder="Ví dụ: 10A12">
-          <label style="margin-top:10px">Họ tên</label><input id="adminHoTenHS">
-          <label style="margin-top:10px">Ngày sinh</label><input id="adminNgaySinhHS" placeholder="dd/MM/yyyy hoặc để trống">
-          <label style="margin-top:10px">Giới tính</label><select id="adminGioiTinhHS"><option value="">-- Chọn --</option><option>Nam</option><option>Nữ</option></select>
-          <div class="btn-row" style="margin-top:14px"><button class="btn-primary" onclick="saveAdminStudent()">Lưu học sinh</button></div>
-        </div>
-        <div class="card" style="margin:0">
-          <div class="sub-title">➕ Thêm lỗi vi phạm mới</div>
-          <label>Mã lỗi</label><input id="adminMaLoi">
-          <label style="margin-top:10px">Nhóm lỗi</label><input id="adminNhomLoi" placeholder="Ví dụ: GIAO_THONG">
-          <label style="margin-top:10px">Tên lỗi</label><input id="adminTenLoi">
-          <label style="margin-top:10px">Điểm trừ chuẩn</label><input id="adminDiemTru" type="number" step="0.01">
-          <label style="margin-top:10px">Đơn vị</label><input id="adminDonVi" value="Lần">
-          <label style="margin-top:10px">Mô tả</label><textarea id="adminMoTa"></textarea>
-          <div class="btn-row" style="margin-top:14px"><button class="btn-primary" onclick="saveAdminError()">Lưu lỗi</button></div>
-        </div>
-      </div>
-      <div class="note">Sau khi thêm mới, dữ liệu sẽ tự xuất hiện ở các menu chọn tương ứng.</div>
-    </div>`;
-}
-async function saveAdminClass(){
-  const payload = { KHOI: document.getElementById('adminKhoiLop').value, TEN_LOP: document.getElementById('adminTenLop').value };
-  await safeTask(async()=>{ const res = await gs('themLop', payload); showToast(res.message || 'Đã thêm lớp'); document.getElementById('adminKhoiLop').value=''; document.getElementById('adminTenLop').value=''; });
-}
-async function saveAdminStudent(){
-  const payload = { MA_HS: document.getElementById('adminMaHS').value, KHOI: document.getElementById('adminKhoiHS').value, LOP: document.getElementById('adminLopHS').value, HO_TEN: document.getElementById('adminHoTenHS').value, NGAY_SINH: document.getElementById('adminNgaySinhHS').value, GIOI_TINH: document.getElementById('adminGioiTinhHS').value };
-  await safeTask(async()=>{ const res = await gs('themHocSinh', payload); showToast(res.message || 'Đã thêm học sinh'); ['adminMaHS','adminKhoiHS','adminLopHS','adminHoTenHS','adminNgaySinhHS'].forEach(id=>document.getElementById(id).value=''); document.getElementById('adminGioiTinhHS').value=''; });
-}
-async function saveAdminError(){
-  const payload = { MA_LOI: document.getElementById('adminMaLoi').value, NHOM_LOI: document.getElementById('adminNhomLoi').value, TEN_LOI: document.getElementById('adminTenLoi').value, DIEM_TRU: document.getElementById('adminDiemTru').value, DON_VI: document.getElementById('adminDonVi').value, MO_TA: document.getElementById('adminMoTa').value };
-  await safeTask(async()=>{ const res = await gs('themLoiViPham', payload); showToast(res.message || 'Đã thêm lỗi'); ['adminMaLoi','adminNhomLoi','adminTenLoi','adminDiemTru','adminMoTa'].forEach(id=>document.getElementById(id).value=''); document.getElementById('adminDonVi').value='Lần'; });
-}
+        <div class="note">Sau khi thêm mới, dữ liệu sẽ tự xuất hiện ở các menu chọn tương ứng.</div>
+      </div>`;
+    await loadAdminAccounts();
+  }
+  async function loadAdminAccounts() {
+    await safeTask(async()=>{ 
+        const accs = await gs('getDanhSachTaiKhoan');
+        document.getElementById('adminAccountsTable').innerHTML = accs.map(x=>`<tr><td>${escapeHtml(x.USERNAME)}</td><td>${escapeHtml(x.ROLE)}</td><td><button class="btn-danger" style="padding:2px 6px;font-size:12px;" onclick="deleteAdminAccount('${escapeHtml(x.USERNAME)}')">Xóa</button></td></tr>`).join('');
+    });
+  }
+  async function saveAdminAccount(){
+    const user = document.getElementById('adminUser').value;
+    const pass = document.getElementById('adminPass').value;
+    const role = document.getElementById('adminRole').value;
+    if(!user || !pass) return showToast('Vui lòng nhập tài khoản và mật khẩu', 'error');
+    await safeTask(async()=>{ 
+        const res = await gs('taoTaiKhoan', user, pass, role); 
+        showToast(res.message || 'Đã tạo tài khoản'); 
+        document.getElementById('adminUser').value=''; 
+        document.getElementById('adminPass').value=''; 
+        await loadAdminAccounts();
+    });
+  }
+  async function deleteAdminAccount(username){
+    if(!confirm(`Bạn có chắc muốn xóa tài khoản ${username}?`)) return;
+    await safeTask(async()=>{ 
+        const res = await gs('xoaTaiKhoan', username); 
+        showToast(res.message || 'Đã xóa tài khoản'); 
+        await loadAdminAccounts();
+    });
+  }
+  async function saveAdminClass(){
+    const payload = { KHOI: document.getElementById('adminKhoiLop').value, TEN_LOP: document.getElementById('adminTenLop').value };
+    await safeTask(async()=>{ const res = await gs('themLop', payload); showToast(res.message || 'Đã thêm lớp'); document.getElementById('adminKhoiLop').value=''; document.getElementById('adminTenLop').value=''; });
+  }
+  async function saveAdminStudent(){
+    const payload = { MA_HS: document.getElementById('adminMaHS').value, KHOI: document.getElementById('adminKhoiHS').value, LOP: document.getElementById('adminLopHS').value, HO_TEN: document.getElementById('adminHoTenHS').value, NGAY_SINH: document.getElementById('adminNgaySinhHS').value, GIOI_TINH: document.getElementById('adminGioiTinhHS').value };
+    await safeTask(async()=>{ const res = await gs('themHocSinh', payload); showToast(res.message || 'Đã thêm học sinh'); ['adminMaHS','adminKhoiHS','adminLopHS','adminHoTenHS','adminNgaySinhHS'].forEach(id=>document.getElementById(id).value=''); document.getElementById('adminGioiTinhHS').value=''; });
+  }
+  async function saveAdminError(){
+    const payload = { MA_LOI: document.getElementById('adminMaLoi').value, NHOM_LOI: document.getElementById('adminNhomLoi').value, TEN_LOI: document.getElementById('adminTenLoi').value, DIEM_TRU: document.getElementById('adminDiemTru').value, DON_VI: document.getElementById('adminDonVi').value, MO_TA: document.getElementById('adminMoTa').value };
+    await safeTask(async()=>{ const res = await gs('themLoiViPham', payload); showToast(res.message || 'Đã thêm lỗi'); ['adminMaLoi','adminNhomLoi','adminTenLoi','adminDiemTru','adminMoTa'].forEach(id=>document.getElementById(id).value=''); document.getElementById('adminDonVi').value='Lần'; });
+  }
 
 
 async function renderScorePage(){
