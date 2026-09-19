@@ -137,10 +137,14 @@ async function safeTask(task){
 
 function toggleSidebar() {
   document.querySelector('.sidebar').classList.toggle('show');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
 }
 
 async function openPage(page, el){
-  if (window.innerWidth <= 768) document.querySelector('.sidebar').classList.remove('show');
+  if (window.innerWidth <= 768) {
+    document.querySelector('.sidebar').classList.remove('show');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+  }
   currentPage = page;
   document.querySelectorAll('.menu-item').forEach(x=>x.classList.remove('active'));
   if(el) el.classList.add('active');
